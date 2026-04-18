@@ -7,10 +7,10 @@
  */
 
 import * as fs from 'node:fs/promises'
+import * as Sentry from '@sentry/tanstackstart-react'
 import { createFileRoute } from '@tanstack/react-router'
 import { createServerFn } from '@tanstack/react-start'
-import * as Sentry from '@sentry/tanstackstart-react'
-import { useState, useEffect } from 'react'
+import { useEffect, useState } from 'react'
 
 export const Route = createFileRoute('/demo/sentry/testing')({
   component: RouteComponent,
@@ -22,9 +22,7 @@ export const Route = createFileRoute('/demo/sentry/testing')({
       <div className="min-h-screen flex items-center justify-center bg-[#181423]">
         <div className="text-center p-8">
           <SentryLogo />
-          <h1 className="text-2xl font-bold text-white mt-4 mb-2">
-            Something went wrong
-          </h1>
+          <h1 className="text-2xl font-bold text-white mt-4 mb-2">Something went wrong</h1>
           <p className="text-[#A49FB5]">{error.message}</p>
         </div>
       </div>
@@ -160,9 +158,7 @@ function FeatureCard({
   return (
     <div className="bg-[#1C1825] rounded-xl p-4 border border-[#2D2640] hover:border-[#7553FF]/50 transition-all group">
       <div className="flex items-center gap-3 mb-2">
-        <div className="text-[#7553FF] group-hover:scale-110 transition-transform">
-          {icon}
-        </div>
+        <div className="text-[#7553FF] group-hover:scale-110 transition-transform">{icon}</div>
         <h3 className="font-semibold text-white">{title}</h3>
       </div>
       <p className="text-sm text-[#A49FB5] pl-9">{description}</p>
@@ -225,9 +221,7 @@ function ResultBadge({
             <title>Trace complete</title>
             <path d="M5 13l4 4L19 7" />
           </svg>
-          <span className="text-[#00F261] text-sm font-medium">
-            Trace completed successfully
-          </span>
+          <span className="text-[#00F261] text-sm font-medium">Trace completed successfully</span>
         </div>
       )}
 
@@ -346,12 +340,9 @@ function RouteComponent() {
 
   const handleClientTrace = async () => {
     setIsLoading((prev) => ({ ...prev, clientTrace: true }))
-    await Sentry.startSpan(
-      { name: 'Client Operation', op: 'demo.client-trace' },
-      async () => {
-        await new Promise((resolve) => setTimeout(resolve, 1000))
-      },
-    )
+    await Sentry.startSpan({ name: 'Client Operation', op: 'demo.client-trace' }, async () => {
+      await new Promise((resolve) => setTimeout(resolve, 1000))
+    })
     setResults((prev) => ({
       ...prev,
       clientTrace: { type: 'success', spanOp: 'demo.client-trace' },
@@ -362,12 +353,9 @@ function RouteComponent() {
   const handleServerTrace = async () => {
     setIsLoading((prev) => ({ ...prev, serverTrace: true }))
     try {
-      await Sentry.startSpan(
-        { name: 'Server Operation', op: 'demo.server-trace' },
-        async () => {
-          await goodServerFunc()
-        },
-      )
+      await Sentry.startSpan({ name: 'Server Operation', op: 'demo.server-trace' }, async () => {
+        await goodServerFunc()
+      })
       setResults((prev) => ({
         ...prev,
         serverTrace: { type: 'success', spanOp: 'demo.server-trace' },
@@ -383,8 +371,7 @@ function RouteComponent() {
       style={{
         fontFamily:
           'system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", sans-serif',
-        background:
-          'linear-gradient(180deg, #181423 0%, #1C1825 50%, #181423 100%)',
+        background: 'linear-gradient(180deg, #181423 0%, #1C1825 50%, #181423 100%)',
       }}
     >
       <div className="max-w-5xl mx-auto px-6 py-16">
@@ -395,17 +382,12 @@ function RouteComponent() {
               <SentryLogo size={56} />
             </div>
             <div className="text-left">
-              <h1 className="text-3xl font-bold text-white tracking-tight">
-                Sentry Demo
-              </h1>
-              <p className="text-[#A49FB5] text-sm">
-                Error monitoring & performance tracing
-              </p>
+              <h1 className="text-3xl font-bold text-white tracking-tight">Sentry Demo</h1>
+              <p className="text-[#A49FB5] text-sm">Error monitoring & performance tracing</p>
             </div>
           </div>
           <p className="text-lg text-[#A49FB5] max-w-xl mx-auto leading-relaxed">
-            Click the buttons below to trigger errors and traces, then view them
-            in your{' '}
+            Click the buttons below to trigger errors and traces, then view them in your{' '}
             <a
               href="https://sentry.io"
               target="_blank"
@@ -434,16 +416,13 @@ function RouteComponent() {
               <path d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
             </svg>
             <div>
-              <p className="text-[#E5A000] font-medium">
-                Sentry is not initialized
-              </p>
+              <p className="text-[#E5A000] font-medium">Sentry is not initialized</p>
               <p className="text-[#A49FB5] text-sm mt-1">
                 Set the{' '}
                 <code className="bg-[#1C1825] px-1.5 py-0.5 rounded text-[#B3A1FF]">
                   VITE_SENTRY_DSN
                 </code>{' '}
-                environment variable to enable error tracking and performance
-                monitoring.
+                environment variable to enable error tracking and performance monitoring.
               </p>
             </div>
           </div>
@@ -508,9 +487,7 @@ function RouteComponent() {
                 >
                   Trigger Client Error
                 </SentryButton>
-                {isLoading.clientError && (
-                  <ProgressBar loading={isLoading.clientError} />
-                )}
+                {isLoading.clientError && <ProgressBar loading={isLoading.clientError} />}
                 {results.clientError && !isLoading.clientError && (
                   <ResultBadge
                     type={results.clientError.type}
@@ -529,9 +506,7 @@ function RouteComponent() {
                 >
                   Test Client Trace
                 </SentryButton>
-                {isLoading.clientTrace && (
-                  <ProgressBar loading={isLoading.clientTrace} />
-                )}
+                {isLoading.clientTrace && <ProgressBar loading={isLoading.clientTrace} />}
                 {results.clientTrace && !isLoading.clientTrace && (
                   <ResultBadge
                     type={results.clientTrace.type}
@@ -560,9 +535,7 @@ function RouteComponent() {
                 >
                   Trigger Server Error
                 </SentryButton>
-                {isLoading.serverError && (
-                  <ProgressBar loading={isLoading.serverError} />
-                )}
+                {isLoading.serverError && <ProgressBar loading={isLoading.serverError} />}
                 {results.serverError && !isLoading.serverError && (
                   <ResultBadge
                     type={results.serverError.type}
@@ -581,9 +554,7 @@ function RouteComponent() {
                 >
                   Test Server Trace
                 </SentryButton>
-                {isLoading.serverTrace && (
-                  <ProgressBar loading={isLoading.serverTrace} />
-                )}
+                {isLoading.serverTrace && <ProgressBar loading={isLoading.serverTrace} />}
                 {results.serverTrace && !isLoading.serverTrace && (
                   <ResultBadge
                     type={results.serverTrace.type}
