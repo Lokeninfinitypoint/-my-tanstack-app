@@ -34,25 +34,34 @@ export const runWebSearch = createServerFn({ method: 'POST' })
               'SERPAPI_API_KEY is not set. Add it to .env.local to enable server-side SerpAPI search.',
           }
         }
-        // Lazy import so the client bundle never pulls serpapi.
-        const { getJson } = await import('serpapi')
-        const json = (await getJson({
-          engine: ENGINE,
-          q: data.q,
-          num: data.num,
-          api_key: apiKey,
-        })) as { organic_results?: Array<Record<string, unknown>> }
+        try {
+          // Lazy import so the client bundle never pulls serpapi.
+          const { getJson } = await import('serpapi')
+          const json = (await getJson({
+            engine: ENGINE,
+            q: data.q,
+            num: data.num,
+            api_key: apiKey,
+          })) as { organic_results?: Array<Record<string, unknown>> }
 
-        const results: SerpResult[] = (json.organic_results ?? [])
-          .slice(0, data.num)
-          .map((r, i) => ({
-            position: (r.position as number) ?? i + 1,
-            title: String(r.title ?? ''),
-            link: String(r.link ?? ''),
-            snippet: String(r.snippet ?? ''),
-            source: r.source ? String(r.source) : undefined,
-          }))
-        return { engine: ENGINE, results }
+          const results: SerpResult[] = (json.organic_results ?? [])
+            .slice(0, data.num)
+            .map((r, i) => ({
+              position: (r.position as number) ?? i + 1,
+              title: String(r.title ?? ''),
+              link: String(r.link ?? ''),
+              snippet: String(r.snippet ?? ''),
+              source: r.source ? String(r.source) : undefined,
+            }))
+          return { engine: ENGINE, results }
+        } catch (err) {
+          Sentry.captureException(err)
+          return {
+            engine: ENGINE,
+            results: [],
+            error: 'Search request failed. Please try again.',
+          }
+        }
       },
     )
   })

@@ -26,29 +26,39 @@ export const chatWithModel = createServerFn({ method: 'POST' })
               'OPENROUTER_API_KEY is not set. Add it to .env.local to enable server-side LLM calls.',
           }
         }
-        const { default: OpenAI } = await import('openai')
-        const client = new OpenAI({
-          apiKey,
-          baseURL: 'https://openrouter.ai/api/v1',
-          defaultHeaders: {
-            'HTTP-Referer': process.env.APP_URL ?? 'http://localhost:3000',
-            'X-Title': 'my-tanstack-app',
-          },
-        })
-        const resp = await client.chat.completions.create({
-          model: data.model ?? MODEL,
-          messages: [
-            {
-              role: 'system',
-              content: 'You are a concise SaaS analytics assistant. Keep answers under 120 words.',
+        try {
+          const { default: OpenAI } = await import('openai')
+          const client = new OpenAI({
+            apiKey,
+            baseURL: 'https://openrouter.ai/api/v1',
+            defaultHeaders: {
+              'HTTP-Referer': process.env.APP_URL ?? 'http://localhost:3000',
+              'X-Title': 'my-tanstack-app',
             },
-            { role: 'user', content: data.prompt },
-          ],
-          max_tokens: 400,
-        })
-        return {
-          model: data.model ?? MODEL,
-          reply: resp.choices[0]?.message?.content ?? '',
+          })
+          const resp = await client.chat.completions.create({
+            model: data.model ?? MODEL,
+            messages: [
+              {
+                role: 'system',
+                content:
+                  'You are a concise SaaS analytics assistant. Keep answers under 120 words.',
+              },
+              { role: 'user', content: data.prompt },
+            ],
+            max_tokens: 400,
+          })
+          return {
+            model: data.model ?? MODEL,
+            reply: resp.choices[0]?.message?.content ?? '',
+          }
+        } catch (err) {
+          Sentry.captureException(err)
+          return {
+            model: data.model ?? MODEL,
+            reply: '',
+            error: 'The model request failed. Please try again.',
+          }
         }
       },
     )

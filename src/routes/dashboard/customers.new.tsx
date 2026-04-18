@@ -2,20 +2,29 @@ import { useForm } from '@tanstack/react-form'
 import { useMutation, useQueryClient } from '@tanstack/react-query'
 import { createFileRoute, useNavigate } from '@tanstack/react-router'
 import { z } from 'zod'
+import { Button } from '#/components/ui/button'
+import { Input } from '#/components/ui/input'
+import { Label } from '#/components/ui/label'
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '#/components/ui/select'
+import { PLAN_LABEL, PLAN_TIERS, type PlanTier } from '#/lib/plans'
 import { createCustomer } from '#/server/customers'
 
 export const Route = createFileRoute('/dashboard/customers/new')({
   component: NewCustomer,
 })
 
-type PlanTier = 'free' | 'starter' | 'pro' | 'enterprise'
-
 const schema = z.object({
   email: z.string().email('Valid email required'),
   name: z.string().min(1, 'Name is required').max(120),
   company: z.string().max(160),
   country: z.string().max(2),
-  planTier: z.enum(['free', 'starter', 'pro', 'enterprise']),
+  planTier: z.enum(PLAN_TIERS),
   seats: z.number().int().min(1).max(10000),
 })
 type FormValues = z.infer<typeof schema>
@@ -32,9 +41,11 @@ function NewCustomer() {
           country: data.country || undefined,
         },
       }),
-    onSuccess: async () => {
-      await qc.invalidateQueries({ queryKey: ['dashboard'] })
-      void navigate({ to: '/dashboard/customers' })
+    onSuccess: async (result) => {
+      if (result.ok) {
+        await qc.invalidateQueries({ queryKey: ['dashboard'] })
+        void navigate({ to: '/dashboard/customers' })
+      }
     },
   })
 
@@ -55,13 +66,16 @@ function NewCustomer() {
     },
   })
 
+  const serverError = mutation.data && !mutation.data.ok ? mutation.data.reason : null
+
   return (
     <div className="flex max-w-xl flex-col gap-4">
       <header>
         <p className="island-kicker">Customers</p>
         <h1 className="m-0 text-2xl font-semibold text-[var(--sea-ink)]">New customer</h1>
         <p className="mt-2 text-sm text-[var(--sea-ink-soft)]">
-          Uses TanStack Form + Zod validation and a Drizzle-backed server function.
+          Uses TanStack Form + Zod validation and a Drizzle-backed server function (transactional
+          insert, duplicate-email handling).
         </p>
       </header>
       <form
@@ -70,116 +84,121 @@ function NewCustomer() {
           e.stopPropagation()
           void form.handleSubmit()
         }}
-        className="island-shell flex flex-col gap-3 rounded-2xl p-5"
+        className="island-shell flex flex-col gap-4 rounded-2xl p-5"
       >
         <form.Field name="name">
           {(field) => (
-            <label className="flex flex-col gap-1 text-sm">
-              <span className="font-semibold text-[var(--sea-ink)]">Name</span>
-              <input
-                className="h-9 rounded-lg border border-[var(--chip-line)] bg-[var(--chip-bg)] px-3"
+            <div className="flex flex-col gap-1.5">
+              <Label htmlFor="name">Name</Label>
+              <Input
+                id="name"
                 value={field.state.value}
                 onChange={(e) => field.handleChange(e.target.value)}
                 onBlur={field.handleBlur}
               />
               <FieldError errors={field.state.meta.errors} />
-            </label>
+            </div>
           )}
         </form.Field>
 
         <form.Field name="email">
           {(field) => (
-            <label className="flex flex-col gap-1 text-sm">
-              <span className="font-semibold text-[var(--sea-ink)]">Email</span>
-              <input
+            <div className="flex flex-col gap-1.5">
+              <Label htmlFor="email">Email</Label>
+              <Input
+                id="email"
                 type="email"
-                className="h-9 rounded-lg border border-[var(--chip-line)] bg-[var(--chip-bg)] px-3"
                 value={field.state.value}
                 onChange={(e) => field.handleChange(e.target.value)}
                 onBlur={field.handleBlur}
               />
               <FieldError errors={field.state.meta.errors} />
-            </label>
+            </div>
           )}
         </form.Field>
 
-        <div className="grid gap-3 sm:grid-cols-2">
+        <div className="grid gap-4 sm:grid-cols-2">
           <form.Field name="company">
             {(field) => (
-              <label className="flex flex-col gap-1 text-sm">
-                <span className="font-semibold text-[var(--sea-ink)]">Company</span>
-                <input
-                  className="h-9 rounded-lg border border-[var(--chip-line)] bg-[var(--chip-bg)] px-3"
+              <div className="flex flex-col gap-1.5">
+                <Label htmlFor="company">Company</Label>
+                <Input
+                  id="company"
                   value={field.state.value}
                   onChange={(e) => field.handleChange(e.target.value)}
                 />
-              </label>
+              </div>
             )}
           </form.Field>
 
           <form.Field name="country">
             {(field) => (
-              <label className="flex flex-col gap-1 text-sm">
-                <span className="font-semibold text-[var(--sea-ink)]">Country (ISO-2)</span>
-                <input
+              <div className="flex flex-col gap-1.5">
+                <Label htmlFor="country">Country (ISO-2)</Label>
+                <Input
+                  id="country"
                   maxLength={2}
-                  className="h-9 rounded-lg border border-[var(--chip-line)] bg-[var(--chip-bg)] px-3 uppercase"
+                  className="uppercase"
                   value={field.state.value}
                   onChange={(e) => field.handleChange(e.target.value.toUpperCase())}
                 />
                 <FieldError errors={field.state.meta.errors} />
-              </label>
+              </div>
             )}
           </form.Field>
         </div>
 
-        <div className="grid gap-3 sm:grid-cols-2">
+        <div className="grid gap-4 sm:grid-cols-2">
           <form.Field name="planTier">
             {(field) => (
-              <label className="flex flex-col gap-1 text-sm">
-                <span className="font-semibold text-[var(--sea-ink)]">Plan</span>
-                <select
-                  className="h-9 rounded-lg border border-[var(--chip-line)] bg-[var(--chip-bg)] px-3"
+              <div className="flex flex-col gap-1.5">
+                <Label htmlFor="planTier">Plan</Label>
+                <Select
                   value={field.state.value}
-                  onChange={(e) => field.handleChange(e.target.value as PlanTier)}
+                  onValueChange={(value) => field.handleChange(value as PlanTier)}
                 >
-                  <option value="free">Free</option>
-                  <option value="starter">Starter</option>
-                  <option value="pro">Pro</option>
-                  <option value="enterprise">Enterprise</option>
-                </select>
-              </label>
+                  <SelectTrigger id="planTier" className="w-full">
+                    <SelectValue placeholder="Select plan" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {PLAN_TIERS.map((tier) => (
+                      <SelectItem key={tier} value={tier}>
+                        {PLAN_LABEL[tier]}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
             )}
           </form.Field>
 
           <form.Field name="seats">
             {(field) => (
-              <label className="flex flex-col gap-1 text-sm">
-                <span className="font-semibold text-[var(--sea-ink)]">Seats</span>
-                <input
+              <div className="flex flex-col gap-1.5">
+                <Label htmlFor="seats">Seats</Label>
+                <Input
+                  id="seats"
                   type="number"
                   min={1}
-                  className="h-9 rounded-lg border border-[var(--chip-line)] bg-[var(--chip-bg)] px-3"
                   value={field.state.value}
                   onChange={(e) => field.handleChange(Number(e.target.value || 1))}
                 />
                 <FieldError errors={field.state.meta.errors} />
-              </label>
+              </div>
             )}
           </form.Field>
         </div>
 
+        {serverError && (
+          <p className="text-sm text-red-600" role="alert">
+            {serverError}
+          </p>
+        )}
+
         <div className="mt-2 flex items-center justify-end gap-2">
-          {mutation.data && 'reason' in mutation.data && mutation.data.reason && (
-            <span className="text-xs text-[var(--sea-ink-soft)]">{mutation.data.reason}</span>
-          )}
-          <button
-            type="submit"
-            disabled={mutation.isPending}
-            className="h-9 rounded-full border border-[var(--chip-line)] bg-[var(--chip-bg)] px-4 text-sm font-semibold text-[var(--sea-ink)] disabled:opacity-60"
-          >
+          <Button type="submit" disabled={mutation.isPending}>
             {mutation.isPending ? 'Saving…' : 'Create customer'}
-          </button>
+          </Button>
         </div>
       </form>
     </div>
