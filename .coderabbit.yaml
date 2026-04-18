@@ -1,0 +1,36 @@
+# CodeRabbit is configured at the repository level via the CodeRabbit GitHub App.
+# Install: https://github.com/apps/coderabbitai  -> select this repo -> enable.
+# This file only tweaks review behaviour once the app is installed.
+# No runtime SDK or server code is involved.
+language: en
+reviews:
+  profile: chill
+  request_changes_workflow: false
+  high_level_summary: true
+  poem: false
+  review_status: true
+  collapse_walkthrough: false
+  path_filters:
+    - "!src/routeTree.gen.ts"
+    - "!drizzle/**"
+    - "!.output/**"
+    - "!dist/**"
+  path_instructions:
+    - path: "src/routes/**"
+      instructions: |
+        TanStack Router file-based routes. Ensure loaders are type-safe and
+        avoid calling server-only modules from code that can execute on the
+        client. Flag accidental `process.env` reads in client components.
+    - path: "src/server/**"
+      instructions: |
+        Server-only modules. Never export secrets or API keys. All third-party
+        API clients (SerpAPI, OpenRouter) must stay behind server functions.
+    - path: "src/db/**"
+      instructions: |
+        Drizzle schema. Prefer explicit column types, enforce FK constraints,
+        and keep migrations in the `drizzle/` output directory.
+  auto_review:
+    enabled: true
+    drafts: false
+chat:
+  auto_reply: true

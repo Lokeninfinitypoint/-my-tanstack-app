@@ -1,5 +1,5 @@
-import { createServerFn } from '@tanstack/react-start'
 import { createFileRoute, useRouter } from '@tanstack/react-router'
+import { createServerFn } from '@tanstack/react-start'
 
 import { getClient } from '#/db'
 
@@ -10,7 +10,7 @@ const getTodos = createServerFn({
   if (!client) {
     return undefined
   }
-  return (await client.query(`SELECT * FROM todos`)) as Array<{
+  return (await client.query('SELECT * FROM todos')) as Array<{
     id: number
     title: string
   }>
@@ -25,7 +25,7 @@ const insertTodo = createServerFn({
     if (!client) {
       return undefined
     }
-    await client.query(`INSERT INTO todos (title) VALUES ($1)`, [data.title])
+    await client.query('INSERT INTO todos (title) VALUES ($1)', [data.title])
   })
 
 export const Route = createFileRoute('/demo/neon')({
@@ -56,14 +56,13 @@ function App() {
     <div
       className="flex items-center justify-center min-h-screen bg-gradient-to-br from-purple-100 to-blue-100 p-4 text-white"
       style={{
-        backgroundImage:
-          'radial-gradient(circle at 5% 40%, #63F655 0%, #00E0D9 40%, #1a0f0a 100%)',
+        backgroundImage: 'radial-gradient(circle at 5% 40%, #63F655 0%, #00E0D9 40%, #1a0f0a 100%)',
       }}
     >
       <div className="w-full max-w-2xl p-8 rounded-xl backdrop-blur-md bg-black/50 shadow-xl border-8 border-black/10">
         <div className="flex items-center justify-center gap-4 mb-8 bg-black/30 p-4 rounded-lg">
           <div className="relative">
-            <div className="absolute -inset-1 bg-gradient-to-r from-emerald-400 to-cyan-400 rounded-lg blur opacity-75 group-hover:opacity-100 transition duration-1000"></div>
+            <div className="absolute -inset-1 bg-gradient-to-r from-emerald-400 to-cyan-400 rounded-lg blur opacity-75 group-hover:opacity-100 transition duration-1000" />
             <div className="relative">
               <img
                 src="/demo-neon.svg"
@@ -143,9 +142,8 @@ function DBConnectionError() {
               1
             </span>
             <div>
-              Use the{' '}
-              <code className="bg-black/30 px-2 py-1 rounded">db/init.sql</code>{' '}
-              file to create the database
+              Use the <code className="bg-black/30 px-2 py-1 rounded">db/init.sql</code> file to
+              create the database
             </div>
           </li>
           <li className="flex items-start">
@@ -153,12 +151,8 @@ function DBConnectionError() {
               2
             </span>
             <div>
-              Set the{' '}
-              <code className="bg-black/30 px-2 py-1 rounded">
-                DATABASE_URL
-              </code>{' '}
-              environment variable to the connection string of your Neon
-              database
+              Set the <code className="bg-black/30 px-2 py-1 rounded">DATABASE_URL</code>{' '}
+              environment variable to the connection string of your Neon database
             </div>
           </li>
         </ul>

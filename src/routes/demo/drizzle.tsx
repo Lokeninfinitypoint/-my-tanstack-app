@@ -1,7 +1,7 @@
 import { createFileRoute, useRouter } from '@tanstack/react-router'
 import { createServerFn } from '@tanstack/react-start'
-import { db } from '#/db/index'
 import { desc } from 'drizzle-orm'
+import { db } from '#/db/index'
 import { todos } from '#/db/schema'
 
 const getTodos = createServerFn({
@@ -50,8 +50,7 @@ function DemoDrizzle() {
     <div
       className="flex items-center justify-center min-h-screen p-4 text-white"
       style={{
-        background:
-          'linear-gradient(135deg, #0c1a2b 0%, #1a2332 50%, #16202e 100%)',
+        background: 'linear-gradient(135deg, #0c1a2b 0%, #1a2332 50%, #16202e 100%)',
       }}
     >
       <div
@@ -71,7 +70,7 @@ function DemoDrizzle() {
           }}
         >
           <div className="relative group">
-            <div className="absolute -inset-2 bg-gradient-to-r from-indigo-500 via-purple-500 to-indigo-500 rounded-lg blur-lg opacity-60 group-hover:opacity-100 transition duration-500"></div>
+            <div className="absolute -inset-2 bg-gradient-to-r from-indigo-500 via-purple-500 to-indigo-500 rounded-lg blur-lg opacity-60 group-hover:opacity-100 transition duration-500" />
             <div className="relative bg-gradient-to-br from-indigo-600 to-purple-600 p-3 rounded-lg">
               <img
                 src="/drizzle.svg"
@@ -107,9 +106,7 @@ function DemoDrizzle() {
             </li>
           ))}
           {todos.length === 0 && (
-            <li className="text-center py-8 text-indigo-300/70">
-              No todos yet. Create one below!
-            </li>
+            <li className="text-center py-8 text-indigo-300/70">No todos yet. Create one below!</li>
           )}
         </ul>
 
@@ -122,7 +119,6 @@ function DemoDrizzle() {
             style={{
               background: 'rgba(93, 103, 227, 0.1)',
               borderColor: 'rgba(93, 103, 227, 0.3)',
-              focusRing: 'rgba(93, 103, 227, 0.5)',
             }}
           />
           <button
@@ -144,9 +140,7 @@ function DemoDrizzle() {
             borderColor: 'rgba(93, 103, 227, 0.2)',
           }}
         >
-          <h3 className="text-lg font-semibold mb-2 text-indigo-200">
-            Powered by Drizzle ORM
-          </h3>
+          <h3 className="text-lg font-semibold mb-2 text-indigo-200">Powered by Drizzle ORM</h3>
           <p className="text-sm text-indigo-300/80 mb-4">
             Next-generation ORM for Node.js & TypeScript with PostgreSQL
           </p>
@@ -155,9 +149,7 @@ function DemoDrizzle() {
             <ol className="list-decimal list-inside space-y-2 text-indigo-300/80">
               <li>
                 Configure your{' '}
-                <code className="px-2 py-1 rounded bg-black/30 text-purple-300">
-                  DATABASE_URL
-                </code>{' '}
+                <code className="px-2 py-1 rounded bg-black/30 text-purple-300">DATABASE_URL</code>{' '}
                 in .env.local
               </li>
               <li>
